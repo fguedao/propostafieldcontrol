@@ -6,14 +6,23 @@ document.getElementById('proposalForm').addEventListener('submit', function(e) {
 function generateProposal() {
     const companyName = document.getElementById('companyName').value;
     const clientName = document.getElementById('clientName').value;
-    const dueDate = document.getElementById('dueDate').value;
-    const teams = parseInt(document.getElementById('teams').value);
+
+    // Formata a data no formato brasileiro
+    const dueDateRaw = new Date(document.getElementById('dueDate').value);
+    const dueDate = dueDateRaw.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+
+    const teams = parseInt(document.getElementById('teams').value) || 1;
 
     const selectedProducts = [];
     const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
     let totalPrice = 0;
 
     productElements.forEach(function(product) {
+        const productName = product.nextElementSibling.textContent.split(' - ')[0]; // Corrige a captura do nome do produto
         const price = parseFloat(product.dataset.price);
         let annualPrice;
 
@@ -29,7 +38,7 @@ function generateProposal() {
         }
 
         totalPrice += annualPrice;
-        selectedProducts.push(`${product.nextElementSibling.textContent} - R$ ${annualPrice.toFixed(2)}`);
+        selectedProducts.push(`${productName} (anualizado) - R$ ${annualPrice.toFixed(2)}`);
     });
 
     const discount = parseFloat(document.getElementById('discount').value) || 0;
@@ -100,5 +109,5 @@ document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
 document.getElementById('teams').addEventListener('input', updateTotal);
 document.getElementById('discount').addEventListener('input', updateTotal);
 
-// Atualiza o total na inicialização da página
+// Inicializa o valor total quando a página carrega
 updateTotal();
