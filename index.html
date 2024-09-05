@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,92 +7,50 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Proposta Comercial Field</h1>
-    <form id="proposalForm">
-        <div>
-            <label for="companyName">Nome da Empresa:</label>
-            <input type="text" id="companyName" required>
-        </div>
-        <div>
-            <label for="clientName">Nome do Cliente:</label>
-            <input type="text" id="clientName" required>
-        </div>
-        <div>
-            <label for="dueDate">Data de Vencimento:</label>
-            <input type="date" id="dueDate" required>
-        </div>
-        <div>
-            <label for="teams">Quantidade de Equipes de Campo:</label>
-            <input type="number" id="teams" value="1" min="1" required>
-        </div>
-
-        <h3>Produtos</h3>
-<div class="product">
-    <input type="checkbox" id="product1" data-price="149" checked>
-    <label for="product1">Painel de gestão - R$149,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product2" data-price="299" checked>
-    <label for="product2">Implantação - R$299,00/ano</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product3" data-price="79" checked>
-    <label for="product3">Licença - Aplicativo do Colaborador - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product4" data-price="79">
-    <label for="product4">Módulo - Área do cliente - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product5" data-price="79">
-    <label for="product5">Módulo - Controle de estoque - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product6" data-price="79">
-    <label for="product6">Módulo - Equipamentos - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product7" data-price="79">
-    <label for="product7">Módulo - Gestão de Veículos - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product8" data-price="79">
-    <label for="product8">Módulo - Gravação de vídeos - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product9" data-price="79">
-    <label for="product9">Módulo - Imagens de alta resolução - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product10" data-price="79">
-    <label for="product10">Módulo - Prazos - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product11" data-price="79">
-    <label for="product11">Módulo - Otimização de rotas - R$79,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product12" data-price="149">
-    <label for="product12">Módulo - Otimização de rotas avançado - R$149,00/mês</label>
-</div>
-<div class="product">
-    <input type="checkbox" id="product13" data-price="79">
-    <label for="product13">Módulo - Reescrita inteligente - R$79,00/mês</label>
-</div>
-
-        <!-- Adicione outros produtos aqui -->
-
-        <div>
-            <label for="discount">Desconto (%):</label>
-            <input type="number" id="discount" value="0" min="0" max="40">
-        </div>
-
-        <button type="submit">Gerar Proposta</button>
-    </form>
-
-    <div id="totalAmount"></div>
-    <div id="proposalOutput"></div>
-
+    <div class="container">
+        <h1>Gerador de Proposta Comercial</h1>
+        <form id="proposalForm">
+            <div class="form-group">
+                <label for="companyName">Nome da Empresa:</label>
+                <input type="text" id="companyName" name="companyName" required>
+            </div>
+            <div class="form-group">
+                <label for="clientName">Nome do Cliente:</label>
+                <input type="text" id="clientName" name="clientName" required>
+            </div>
+            <div class="form-group">
+                <label for="dueDate">Data de Vencimento:</label>
+                <input type="date" id="dueDate" name="dueDate" required>
+            </div>
+            <div class="form-group">
+                <label for="teams">Quantidade de Equipes de Campo:</label>
+                <input type="number" id="teams" name="teams" value="1" min="1" required>
+            </div>
+            <div class="form-group">
+                <h3>Produtos Disponíveis</h3>
+                <label><input type="checkbox" id="product1" data-name="Painel de gestão" data-price="179"> Painel de gestão - R$179,00/mês</label><br>
+                <label><input type="checkbox" id="product2" data-name="Implantação" data-price="299"> Implantação - R$299,00/ano</label><br>
+                <label><input type="checkbox" id="product3" data-name="Licença - Aplicativo do Colaborador" data-price="79"> Licença - Aplicativo do Colaborador - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product4" data-name="Módulo - Área do cliente" data-price="79"> Módulo - Área do cliente - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product5" data-name="Módulo - Controle de estoque" data-price="79"> Módulo - Controle de estoque - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product6" data-name="Módulo - Equipamentos" data-price="79"> Módulo - Equipamentos - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product7" data-name="Módulo - Gestão de Veículos" data-price="79"> Módulo - Gestão de Veículos - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product8" data-name="Módulo - Gravação de vídeos" data-price="79"> Módulo - Gravação de vídeos - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product9" data-name="Módulo - Imagens de alta resolução" data-price="79"> Módulo - Imagens de alta resolução - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product10" data-name="Módulo - Prazos" data-price="79"> Módulo - Prazos - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product11" data-name="Módulo - Otimização de rotas" data-price="79"> Módulo - Otimização de rotas - R$79,00/mês</label><br>
+                <label><input type="checkbox" id="product12" data-name="Módulo - Otimização de rotas avançado" data-price="149"> Módulo - Otimização de rotas avançado - R$149,00/mês</label><br>
+                <label><input type="checkbox" id="product13" data-name="Módulo - Reescrita inteligente" data-price="79"> Módulo - Reescrita inteligente - R$79,00/mês</label>
+            </div>
+            <div class="form-group">
+                <label for="discount">Desconto (%):</label>
+                <input type="number" id="discount" name="discount" min="0" max="100" value="0">
+            </div>
+            <button type="submit">Gerar Proposta</button>
+        </form>
+        <div id="proposalOutput"></div>
+        <div id="paymentDetails"></div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

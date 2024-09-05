@@ -1,28 +1,14 @@
-document.getElementById('proposalForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    generateProposal();
-});
-
 function generateProposal() {
     const companyName = document.getElementById('companyName').value;
     const clientName = document.getElementById('clientName').value;
-
-    // Formata a data no formato brasileiro
-    const dueDateRaw = new Date(document.getElementById('dueDate').value);
-    const dueDate = dueDateRaw.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
-
-    const teams = parseInt(document.getElementById('teams').value) || 1;
+    const dueDate = document.getElementById('dueDate').value;
+    const teams = parseInt(document.getElementById('teams').value);
 
     const selectedProducts = [];
     const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
     let totalPrice = 0;
 
     productElements.forEach(function(product) {
-        const productName = product.nextElementSibling.textContent.split(' - ')[0]; // Corrige a captura do nome do produto
         const price = parseFloat(product.dataset.price);
         let annualPrice;
 
@@ -38,7 +24,7 @@ function generateProposal() {
         }
 
         totalPrice += annualPrice;
-        selectedProducts.push(`${productName} (anualizado) - R$ ${annualPrice.toFixed(2)}`);
+        selectedProducts.push(`${product.dataset.name} (anualizado) - R$ ${annualPrice.toFixed(2)}`);
     });
 
     const discount = parseFloat(document.getElementById('discount').value) || 0;
@@ -49,9 +35,6 @@ function generateProposal() {
         <p><strong>Nome da Empresa:</strong> ${companyName}</p>
         <p><strong>Nome do Cliente:</strong> ${clientName}</p>
         <p><strong>Quantidade de Equipes de Campo:</strong> ${teams}</p>
-    `;
-
-    proposalText += `
         <h3>Produtos Selecionados</h3>
         <ul>
     `;
@@ -62,52 +45,56 @@ function generateProposal() {
 
     proposalText += `</ul>`;
 
-    proposalText += `
-        <p><strong>Total Anual (com desconto):</strong> R$ ${discountedPrice.toFixed(2)}</p>
-        <p><strong>Data de Vencimento:</strong> ${dueDate}</p>
-    `;
+    // Valor original e valor com desconto
+    proposalText += `<p><strong>Total Anual:</strong> R$ ${totalPrice.toFixed(2)}</p>`;
+    if (discount > 0) {
+        proposalText += `<p><strong>Total Anual (com desconto):</strong> R$ ${discountedPrice.toFixed(2)}</p>`;
+    }
+
+    // Alerta se o desconto for maior que 15%
+    if (discount > 15) {
+        proposalText += `<p style="color: red;"><strong>Atenção:</strong> O desconto excede 15%. A proposta comercial correrá o risco de não ser aprovada pela diretoria.</p>`;
+    }
+
+    proposalText += `<p><strong>Data de Vencimento:</strong> ${formatDate(dueDate)}</p>`;
 
     document.getElementById('proposalOutput').innerHTML = proposalText;
+
+    // Mostrar opções de pagamento com o valor correto
+    displayPaymentOptions(discount > 0 ? discountedPrice : totalPrice);
 }
 
-function updateTotal() {
-    const teams = parseInt(document.getElementById('teams').value) || 1;
-    const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
-    let totalPrice = 0;
+function displayPaymentOptions(total) {
+    const minBoletoValue = 500;
+    let paymentOptions = '';
 
-    productElements.forEach(function(product) {
-        const price = parseFloat(product.dataset.price);
-        let annualPrice;
+    // Opção 1: Cartão de Crédito
+    const creditCardInstallments = total / 12;
+    paymentOptions += `<h3>Opções de Pagamento</h3>`;
+    paymentOptions += `<p><strong>Opção 1:</strong> Parcelamento em até 12x no Cartão de Crédito. Cada parcela será de R$ ${creditCardInstallments.toFixed(2)}.</p>`;
 
-        // Ajuste especial para produtos
-        if (product.id === 'product2') { // Implantação
-            annualPrice = price; // Valor fixo de R$299,00/ano
-        } else if (product.id === 'product3') { // Licença - Aplicativo do Colaborador
-            annualPrice = price * 12 * teams; // Multiplicar por 12 e quantidade de equipes
-        } else if (product.id === 'product1') { // Painel de gestão
-            annualPrice = price * 12; // Multiplicar por 12
-        } else {
-            annualPrice = price * 12; // Multiplicar apenas por 12 para os outros produtos
-        }
+    // Opção 2: Boletos
+    paymentOptions += `<p><strong>Opção 2:</strong> Parcelamento em Boletos</p>`;
+    
+    let maxBoletos = Math.floor(total / minBoletoValue);
+    let boletoValue = total / maxBoletos;
 
-        totalPrice += annualPrice;
-    });
+    if (boletoValue < minBoletoValue) {
+        maxBoletos--;
+        boletoValue = total / maxBoletos;
+    }
 
-    const discount = parseFloat(document.getElementById('discount').value) || 0;
-    const discountedPrice = totalPrice - (totalPrice * (discount / 100));
+    paymentOptions += `<p>O valor total será dividido em ${maxBoletos} boletos de R$ ${boletoValue.toFixed(2)}.</p>`;
 
-    document.getElementById('totalAmount').innerHTML = `
-        <p><strong>Valor Total Anual:</strong> R$ ${discountedPrice.toFixed(2)}</p>
-    `;
+    document.getElementById('paymentDetails').innerHTML = paymentOptions;
 }
 
-// Adiciona event listeners aos checkboxes e ao campo de equipes
-document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
-    checkbox.addEventListener('change', updateTotal);
+function formatDate(date) {
+    const [year, month, day] = date.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+document.getElementById('proposalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    generateProposal();
 });
-
-document.getElementById('teams').addEventListener('input', updateTotal);
-document.getElementById('discount').addEventListener('input', updateTotal);
-
-// Inicializa o valor total quando a página carrega
-updateTotal();
