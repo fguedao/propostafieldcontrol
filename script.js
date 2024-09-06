@@ -3,6 +3,9 @@ document.getElementById('proposalForm').addEventListener('submit', function (e) 
     generateProposal();
 });
 
+// Constantes para valores fixos
+const IMPLANTACAO_FIXA = 299;
+
 function generateProposal() {
     const companyName = document.getElementById('companyName').value;
     const clientName = document.getElementById('clientName').value;
@@ -10,22 +13,33 @@ function generateProposal() {
     const teams = parseInt(document.getElementById('teams').value) || 1;
     const discount = parseFloat(document.getElementById('discount').value) || 0;
 
+    // Validação simples de campos obrigatórios
+    if (!companyName || !clientName || !dueDate) {
+        alert('Preencha todos os campos obrigatórios!');
+        return;
+    }
+
     const selectedProducts = [];
     const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
     let totalPrice = 0;
 
+    // Calcular o valor total
     productElements.forEach(function (product) {
         const price = parseFloat(product.dataset.price);
         let annualPrice;
 
-        if (product.id === 'product2') { // Implantação - valor fixo de R$299,00
-            annualPrice = 299; // Valor fixo para implantação
-        } else if (product.id === 'product3') { // Licença - Aplicativo do Colaborador
-            annualPrice = price * teams * 12; // Multiplica pelo número de equipes e 12 meses
-        } else if (product.id === 'product1') { // Painel de gestão
-            annualPrice = price * 12; // Multiplica por 12
-        } else {
-            annualPrice = price * 12; // Multiplica por 12 para os outros módulos
+        switch (product.id) {
+            case 'product2': // Implantação - valor fixo de R$299,00
+                annualPrice = IMPLANTACAO_FIXA;
+                break;
+            case 'product3': // Licença - Aplicativo do Colaborador
+                annualPrice = price * teams * 12;
+                break;
+            case 'product1': // Painel de gestão
+                annualPrice = price * 12;
+                break;
+            default: // Outros módulos
+                annualPrice = price * 12;
         }
 
         totalPrice += annualPrice;
@@ -34,6 +48,7 @@ function generateProposal() {
 
     const discountedPrice = totalPrice - (totalPrice * (discount / 100));
 
+    // Geração da proposta
     let proposalText = `
         <h2>Proposta Comercial</h2>
         <p><strong>Nome da Empresa:</strong> ${companyName}</p>
@@ -67,11 +82,8 @@ function generateProposal() {
 function displayPaymentOptions(totalAmount, discount) {
     const maxBoletos = 12;
 
-    let cardInstallments = '';
-    let boletoOptions = '';
-
     // Opção 1: Cartão de Crédito
-    cardInstallments = `
+    let cardInstallments = `
         <div class="payment-option card">
             <p><strong>Opção 1:</strong> Parcelamento no Cartão de Crédito</p>
             <p><strong>Total Anual:</strong> ${formatCurrency(totalAmount)}</p>
@@ -90,7 +102,7 @@ function displayPaymentOptions(totalAmount, discount) {
     `;
 
     // Opção 2: Boleto Bancário
-    boletoOptions = `
+    let boletoOptions = `
         <div class="payment-option boleto">
             <p><strong>Opção 2:</strong> Parcelamento em Boletos</p>
             <p><strong>Total Anual:</strong> ${formatCurrency(totalAmount)}</p>
@@ -121,22 +133,26 @@ function displayPaymentOptions(totalAmount, discount) {
     
     // Atualizar valores das parcelas ao mudar seleção
     document.getElementById('cardInstallments').addEventListener('change', function () {
-        const installments = parseInt(this.value);
-        const amountPerInstallment = formatCurrency(totalAmount / installments);
-        document.getElementById('cardInstallmentsAmount').innerText = `Valor de cada parcela: ${amountPerInstallment}`;
+        updateInstallments(this.value, totalAmount, 'cardInstallmentsAmount');
     });
 
     document.getElementById('boletoInstallments').addEventListener('change', function () {
-        const installments = parseInt(this.value);
-        const amountPerInstallment = formatCurrency(totalAmount / installments);
-        document.getElementById('boletoInstallmentsAmount').innerText = `Valor de cada boleto: ${amountPerInstallment}`;
+        updateInstallments(this.value, totalAmount, 'boletoInstallmentsAmount');
     });
 }
 
+// Função para atualizar o valor das parcelas
+function updateInstallments(installments, totalAmount, elementId) {
+    const amountPerInstallment = formatCurrency(totalAmount / parseInt(installments));
+    document.getElementById(elementId).innerText = `Valor de cada parcela: ${amountPerInstallment}`;
+}
+
+// Função para formatar valores em moeda
 function formatCurrency(value) {
     return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+// Função para atualizar o valor total ao mudar inputs
 function updateTotal() {
     const teams = parseInt(document.getElementById('teams').value) || 1;
     const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
@@ -146,14 +162,18 @@ function updateTotal() {
         const price = parseFloat(product.dataset.price);
         let annualPrice;
 
-        if (product.id === 'product2') { // Implantação
-            annualPrice = 299; // Valor fixo para implantação
-        } else if (product.id === 'product3') { // Licença - Aplicativo do Colaborador
-            annualPrice = price * teams * 12; // Multiplicar pela quantidade de equipes e por 12 (mensal)
-        } else if (product.id === 'product1') { // Painel de gestão
-            annualPrice = price * 12; // Multiplicar por 12
-        } else {
-            annualPrice = price * 12; // Para os outros produtos, multiplicar por 12 (mensal)
+        switch (product.id) {
+            case 'product2': // Implantação
+                annualPrice = IMPLANTACAO_FIXA;
+                break;
+            case 'product3': // Licença - Aplicativo do Colaborador
+                annualPrice = price * teams * 12;
+                break;
+            case 'product1': // Painel de gestão
+                annualPrice = price * 12;
+                break;
+            default:
+                annualPrice = price * 12;
         }
 
         totalPrice += annualPrice;
@@ -167,9 +187,87 @@ function updateTotal() {
     `;
 }
 
+// Atualizar o total sempre que houver mudança nos inputs
 document.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
     checkbox.addEventListener('change', updateTotal);
 });
-
 document.getElementById('teams').addEventListener('input', updateTotal);
 document.getElementById('discount').addEventListener('input', updateTotal);
+
+document.getElementById('printProposalButton').addEventListener('click', function () {
+    openProposalInNewPage();
+});
+// código para abrir uma nova tela com a proposta comercial
+
+
+document.getElementById('printProposalButton').addEventListener('click', function () {
+    openProposalInNewPage();
+});
+
+function openProposalInNewPage() {
+    const proposalContent = document.getElementById('proposalOutput').innerHTML;
+    const dueDate = document.getElementById('dueDate').value; // Pega o valor da data de vencimento
+
+    // Verifique se há conteúdo de proposta antes de abrir a nova página
+    if (!proposalContent) {
+        alert('Por favor, gere a proposta antes de visualizar.');
+        return;
+    }
+
+    // Converter a data para o formato DD/MM/AAAA
+    const dueDateFormatted = formatDateToBR(dueDate);
+
+    // Abrir nova janela
+    const newWindow = window.open('', '_blank', 'width=800,height=600');
+
+    // Verificar se o pop-up foi bloqueado
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        alert('Desative o bloqueador de pop-ups e tente novamente.');
+        return;
+    }
+
+    const styles = `
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+            h2 { text-align: center; }
+            p { font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+            ul { list-style-type: none; padding: 0; }
+            ul li { background-color: #e9e9e9; margin-bottom: 5px; padding: 10px; border-radius: 4px; }
+            .proposal { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+            .proposal h2 { color: #333; }
+            .total { font-weight: bold; font-size: 16px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }
+        </style>
+    `;
+
+    // Conteúdo da nova página
+    const newWindowContent = `
+        <html>
+            <head>
+                <title>Proposta Comercial</title>
+                ${styles}
+            </head>
+            <body>
+                <div class="proposal">
+                    ${proposalContent}
+                    <div class="footer">
+                        <p>Esta proposta é válida até ${dueDateFormatted}.</p>
+                        <p>Field Control - Soluções para Gestão de Equipes de Campo</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `;
+
+    // Escrever o conteúdo na nova janela
+    newWindow.document.write(newWindowContent);
+    newWindow.document.close(); // Fecha o documento para garantir o carregamento
+    newWindow.focus(); // Focar na nova janela
+}
+
+// Função para formatar a data para o formato DD/MM/AAAA
+function formatDateToBR(dateString) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+}
+
