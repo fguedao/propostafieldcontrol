@@ -12,6 +12,7 @@ function generateProposal() {
     const dueDate = document.getElementById('dueDate').value;
     const teams = parseInt(document.getElementById('teams').value) || 1;
     const discount = parseFloat(document.getElementById('discount').value) || 0;
+    const boletoInstallments = 1; // Inicialmente o valor de parcelas é 1, será atualizado na opção 2
 
     // Validação simples de campos obrigatórios
     if (!companyName || !clientName || !dueDate) {
@@ -51,10 +52,13 @@ function generateProposal() {
     // Geração da proposta
     let proposalText = `
         <h2>Proposta Comercial</h2>
-        <p><strong>Nome da Empresa:</strong> ${companyName}</p>
-        <p><strong>Nome do Cliente:</strong> ${clientName}</p>
-        <p><strong>Quantidade de Equipes de Campo:</strong> ${teams}</p>
-        <p><strong>Total Anual:</strong> ${formatCurrency(totalPrice)}</p>
+        <div class="proposal-info">
+            <p><strong>Nome da Empresa:</strong> ${companyName}</p>
+            <p><strong>Nome do Cliente:</strong> ${clientName}</p>
+            <p><strong>Data de Vencimento:</strong> ${formatDateBR(dueDate)}</p>
+            <p><strong>Quantidade de Equipes de Campo:</strong> ${teams}</p>
+            <p><strong>Total Anual:</strong> ${formatCurrency(totalPrice)}</p>
+        </div>
     `;
 
     if (discount > 0) {
@@ -76,75 +80,54 @@ function generateProposal() {
     proposalText += `</ul>`;
 
     document.getElementById('proposalOutput').innerHTML = proposalText;
-    displayPaymentOptions(discountedPrice, discount);
+    displayPaymentOptions(discountedPrice, boletoInstallments);
 }
 
-function displayPaymentOptions(totalAmount, discount) {
-    const maxBoletos = 12;
+function displayPaymentOptions(totalAmount, boletoInstallments) {
+    const maxInstallments = 12;
 
-    // Opção 1: Cartão de Crédito
+    // Opção 1: Cartão de Crédito - fixo em até 12 parcelas
     let cardInstallments = `
         <div class="payment-option card">
             <p><strong>Opção 1:</strong> Parcelamento no Cartão de Crédito</p>
             <p><strong>Total Anual:</strong> ${formatCurrency(totalAmount)}</p>
-            <label for="cardInstallments">Escolha o número de parcelas:</label>
-            <select id="cardInstallments" name="cardInstallments">
-    `;
-
-    for (let i = 1; i <= 12; i++) {
-        cardInstallments += `<option value="${i}">${i}x</option>`;
-    }
-
-    cardInstallments += `
-            </select>
-            <p id="cardInstallmentsAmount"></p>
+            <p><strong>Parcelamento:</strong> até 12x de ${formatCurrency(totalAmount / maxInstallments)}</p>
         </div>
     `;
 
-    // Opção 2: Boleto Bancário
+    // Opção 2: Boleto Bancário com seletor de parcelas (somente aqui)
     let boletoOptions = `
         <div class="payment-option boleto">
-            <p><strong>Opção 2:</strong> Parcelamento em Boletos</p>
+            <p><strong>Opção 2:</strong> Pagamento via Boleto</p>
             <p><strong>Total Anual:</strong> ${formatCurrency(totalAmount)}</p>
             <label for="boletoInstallments">Escolha o número de boletos:</label>
             <select id="boletoInstallments" name="boletoInstallments">
     `;
 
-    for (let i = 1; i <= maxBoletos; i++) {
-        boletoOptions += `<option value="${i}">${i}x</option>`;
+    for (let i = 1; i <= maxInstallments; i++) {
+        boletoOptions += `<option value="${i}" ${i == boletoInstallments ? 'selected' : ''}>${i}x</option>`;
     }
 
     boletoOptions += `
             </select>
-            <p id="boletoInstallmentsAmount"></p>
+            <p id="boletoInstallmentsAmount">Parcelamento em ${boletoInstallments}x de ${formatCurrency(totalAmount / boletoInstallments)}</p>
         </div>
     `;
 
-    let attentionMessage = '';
-    if (discount > 15) {
-        attentionMessage = `
-            <div class="attention" style="color: red; font-weight: bold; margin-top: 20px;">
-                <p><strong>Atenção:</strong> A proposta comercial corre o risco de não ser aprovada pela diretoria devido ao desconto elevado (${discount}%).</p>
-            </div>
-        `;
-    }
+    document.getElementById('paymentDetails').innerHTML = `${cardInstallments}${boletoOptions}`;
 
-    document.getElementById('paymentDetails').innerHTML = `${cardInstallments}${boletoOptions}${attentionMessage}`;
-    
-    // Atualizar valores das parcelas ao mudar seleção
-    document.getElementById('cardInstallments').addEventListener('change', function () {
-        updateInstallments(this.value, totalAmount, 'cardInstallmentsAmount');
-    });
-
+    // Atualizar o valor das parcelas ao selecionar uma nova quantidade de boletos
     document.getElementById('boletoInstallments').addEventListener('change', function () {
-        updateInstallments(this.value, totalAmount, 'boletoInstallmentsAmount');
-    });
-}
+        const newInstallments = parseInt(this.value);
+        const installmentValue = totalAmount / newInstallments;
 
-// Função para atualizar o valor das parcelas
-function updateInstallments(installments, totalAmount, elementId) {
-    const amountPerInstallment = formatCurrency(totalAmount / parseInt(installments));
-    document.getElementById(elementId).innerText = `Valor de cada parcela: ${amountPerInstallment}`;
+        // Verifica se o valor da parcela é válido e exibe
+        if (isFinite(installmentValue)) {
+            document.getElementById('boletoInstallmentsAmount').innerText = `Parcelamento em ${newInstallments}x de ${formatCurrency(installmentValue)}`;
+        } else {
+            document.getElementById('boletoInstallmentsAmount').innerText = `Erro ao calcular parcelas`;
+        }
+    });
 }
 
 // Função para formatar valores em moeda
@@ -152,61 +135,21 @@ function formatCurrency(value) {
     return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-// Função para atualizar o valor total ao mudar inputs
-function updateTotal() {
-    const teams = parseInt(document.getElementById('teams').value) || 1;
-    const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
-    let totalPrice = 0;
-
-    productElements.forEach(function (product) {
-        const price = parseFloat(product.dataset.price);
-        let annualPrice;
-
-        switch (product.id) {
-            case 'product2': // Implantação
-                annualPrice = IMPLANTACAO_FIXA;
-                break;
-            case 'product3': // Licença - Aplicativo do Colaborador
-                annualPrice = price * teams * 12;
-                break;
-            case 'product1': // Painel de gestão
-                annualPrice = price * 12;
-                break;
-            default:
-                annualPrice = price * 12;
-        }
-
-        totalPrice += annualPrice;
-    });
-
-    const discount = parseFloat(document.getElementById('discount').value) || 0;
-    const discountedPrice = totalPrice - (totalPrice * (discount / 100));
-
-    document.getElementById('totalAmount').innerHTML = `
-        <p><strong>Valor Total Anual:</strong> ${formatCurrency(discountedPrice)}</p>
-    `;
+// Função para formatar a data no formato brasileiro
+function formatDateBR(dateString) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
 }
 
-// Atualizar o total sempre que houver mudança nos inputs
-document.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
-    checkbox.addEventListener('change', updateTotal);
-});
-document.getElementById('teams').addEventListener('input', updateTotal);
-document.getElementById('discount').addEventListener('input', updateTotal);
-
-document.getElementById('printProposalButton').addEventListener('click', function () {
-    openProposalInNewPage();
-});
-// código para abrir uma nova tela com a proposta comercial
-
-
+// Função para abrir a nova página com a proposta comercial
 document.getElementById('printProposalButton').addEventListener('click', function () {
     openProposalInNewPage();
 });
 
+// Função para abrir a nova janela com a proposta comercial
 function openProposalInNewPage() {
     const proposalContent = document.getElementById('proposalOutput').innerHTML;
-    const dueDate = document.getElementById('dueDate').value; // Pega o valor da data de vencimento
+    const paymentDetails = document.getElementById('paymentDetails').innerHTML;
 
     // Verifique se há conteúdo de proposta antes de abrir a nova página
     if (!proposalContent) {
@@ -214,11 +157,8 @@ function openProposalInNewPage() {
         return;
     }
 
-    // Converter a data para o formato DD/MM/AAAA
-    const dueDateFormatted = formatDateToBR(dueDate);
-
     // Abrir nova janela
-    const newWindow = window.open('', '_blank', 'width=800,height=600');
+    const newWindow = window.open('', '_blank', 'width=900,height=800');
 
     // Verificar se o pop-up foi bloqueado
     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
@@ -228,19 +168,19 @@ function openProposalInNewPage() {
 
     const styles = `
         <style>
-            body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
-            h2 { text-align: center; }
-            p { font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
-            ul { list-style-type: none; padding: 0; }
-            ul li { background-color: #e9e9e9; margin-bottom: 5px; padding: 10px; border-radius: 4px; }
-            .proposal { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-            .proposal h2 { color: #333; }
-            .total { font-weight: bold; font-size: 16px; }
-            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }
+            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 30px; background-color: #f0f2f5; color: #333; }
+            h2 { text-align: center; font-size: 28px; color: #1a73e8; margin-bottom: 20px; }
+            .proposal-content { background-color: #fff; padding: 20px; margin: 0 auto; max-width: 900px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
+            .proposal-info p { font-size: 18px; margin: 5px 0; font-weight: bold; }
+            ul { padding: 0; list-style: none; margin-bottom: 30px; }
+            ul li { background-color: #f9f9f9; padding: 12px 20px; margin-bottom: 10px; border-radius: 6px; font-size: 16px; color: #444; }
+            .total { font-weight: bold; font-size: 20px; margin-top: 25px; color: #1a73e8; text-align: right; }
+            .payment-options { margin-top: 40px; }
+            .payment-option { background-color: #fafafa; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+            .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #777; }
         </style>
     `;
 
-    // Conteúdo da nova página
     const newWindowContent = `
         <html>
             <head>
@@ -248,10 +188,14 @@ function openProposalInNewPage() {
                 ${styles}
             </head>
             <body>
-                <div class="proposal">
+                <div class="proposal-content">
                     ${proposalContent}
+                    <div class="payment-options">
+                        <h3>Opções de Pagamento</h3>
+                        ${paymentDetails.replace(/<select[\s\S]*?<\/select>/, '')} <!-- Remove o seletor de boletos -->
+                    </div>
                     <div class="footer">
-                        <p>Esta proposta é válida até ${dueDateFormatted}.</p>
+                        <p>Proposta válida até ${formatDateBR(document.getElementById('dueDate').value)}</p>
                         <p>Field Control - Soluções para Gestão de Equipes de Campo</p>
                     </div>
                 </div>
@@ -261,13 +205,6 @@ function openProposalInNewPage() {
 
     // Escrever o conteúdo na nova janela
     newWindow.document.write(newWindowContent);
-    newWindow.document.close(); // Fecha o documento para garantir o carregamento
-    newWindow.focus(); // Focar na nova janela
+    newWindow.document.close();
+    newWindow.focus();
 }
-
-// Função para formatar a data para o formato DD/MM/AAAA
-function formatDateToBR(dateString) {
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-}
-
