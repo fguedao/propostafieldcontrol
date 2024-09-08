@@ -156,6 +156,8 @@ document.getElementById('printProposalButton').addEventListener('click', functio
 });
 
 // Função para abrir a nova janela com a proposta comercial
+
+// Função para abrir a nova janela com a proposta comercial
 function openProposalInNewPage() {
     const proposalContent = document.getElementById('proposalOutput').innerHTML;
     const paymentDetails = document.getElementById('paymentDetails').innerHTML;
@@ -175,22 +177,115 @@ function openProposalInNewPage() {
         return;
     }
 
+    // Remover o seletor de quantidade de boletos da visualização
+    const paymentDetailsWithoutSelect = paymentDetails.replace(/<select[\s\S]*?<\/select>/, '');
+
+    // Adicionando o estilo da página 2 na nova janela, agora com um layout mais compacto
     const styles = `
         <style>
-            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 30px; background-color: #f0f2f5; color: #333; }
-            h2 { text-align: center; font-size: 28px; color: #1a73e8; margin-bottom: 20px; }
-            .proposal-content { background-color: #fff; padding: 20px; margin: 0 auto; max-width: 900px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
-            .proposal-info p { font-size: 18px; margin: 5px 0; font-weight: bold; line-height: 1.5; text-align: justify; }
-            ul { padding: 0; list-style: none; margin-bottom: 30px; }
-            ul li { background-color: #f9f9f9; padding: 12px 20px; margin-bottom: 10px; border-radius: 6px; font-size: 16px; color: #444; line-height: 1.4; }
-            .total { font-weight: bold; font-size: 20px; margin-top: 25px; color: #1a73e8; text-align: right; }
-            .payment-options { margin-top: 40px; }
-            .payment-option { background-color: #fafafa; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
-            .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #777; }
-            .attention { margin-top: 20px; text-align: center; color: red; font-weight: bold; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f8f9fa;
+                color: #333;
+                line-height: 1.4;
+                padding: 15px;
+                margin: 0;
+            }
+            .proposal-content {
+                max-width: 800px;
+                margin: 0 auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e1e5eb;
+            }
+            h2 {
+                font-size: 1.5rem;
+                font-weight: 500;
+                color: #007bff;
+                text-align: center;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #007bff;
+                padding-bottom: 8px;
+            }
+            .proposal-info {
+                margin-bottom: 15px;
+                font-size: 1rem;
+                color: #495057;
+            }
+            .proposal-info p {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #e1e5eb;
+                padding: 6px 0;
+                font-size: 0.95rem;
+            }
+            .proposal-info p strong {
+                color: #007bff;
+                font-weight: 600;
+            }
+            ul {
+                list-style-type: none;
+                padding: 0;
+                margin-top: 10px;
+            }
+            ul li {
+                background-color: #fff;
+                border: 1px solid #e1e5eb;
+                border-radius: 6px;
+                padding: 10px 12px;
+                margin-bottom: 8px;
+                font-size: 0.95rem;
+                color: #495057;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+            #paymentDetails {
+                margin-top: 20px;
+                padding: 15px;
+                background-color: #ffffff;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e1e5eb;
+            }
+            .payment-option {
+                padding: 12px;
+                margin-bottom: 15px;
+                border: 1px solid #e1e5eb;
+                border-radius: 8px;
+                background-color: #f8f9fa;
+            }
+            .payment-option:hover {
+                background-color: #f1f3f5;
+            }
+            .payment-option p {
+                font-size: 0.95rem;
+                color: #495057;
+                margin: 6px 0;
+                line-height: 1.4;
+            }
+            .attention {
+                background-color: #ffe6e6;
+                border-left: 4px solid red;
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                font-weight: 500;
+                color: #e53935;
+                margin-top: 15px;
+                text-align: center;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                font-size: 0.85rem;
+                color: #777;
+            }
         </style>
     `;
 
+    // Conteúdo a ser exibido na nova janela sem o seletor de quantidade de boletos
     const newWindowContent = `
         <html>
             <head>
@@ -200,9 +295,9 @@ function openProposalInNewPage() {
             <body>
                 <div class="proposal-content">
                     ${proposalContent}
-                    <div class="payment-options">
-                        <h3>Opções de Pagamento</h3>
-                        ${paymentDetails.replace(/<select[\s\S]*?<\/select>/, '')} <!-- Remove o seletor de boletos -->
+                    <div id="paymentDetails">
+                        <h3>Detalhes do Pagamento</h3>
+                        ${paymentDetailsWithoutSelect}
                     </div>
                     <div class="footer">
                         <p>Proposta válida até ${formatDateBR(document.getElementById('dueDate').value)}</p>
@@ -218,6 +313,7 @@ function openProposalInNewPage() {
     newWindow.document.close();
     newWindow.focus();
 }
+
 
 function generateProposal() {
     const companyName = document.getElementById('companyName').value;
@@ -296,3 +392,4 @@ function generateProposal() {
     displayPaymentOptions(discountedPrice, discount);
 }
 
+///tese
