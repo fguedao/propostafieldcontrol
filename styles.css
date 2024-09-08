@@ -281,3 +281,61 @@ button:active {
     font-size: 0.9rem;
     color: #777;
 }
+
+.proposal-info {
+    margin-bottom: 15px;
+    font-size: 1rem;
+    color: #333;
+    background-color: #f4f6f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.proposal-info p {
+    margin: 10px 0;
+    padding: 10px 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    border-bottom: 1px solid #e1e5eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.proposal-info p:last-child {
+    border-bottom: none;
+}
+
+.proposal-info strong {
+    color: #007bff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-right: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+ul li {
+    background-color: #ffffff;
+    border: 1px solid #e1e5eb;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #555;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+#paymentDetails {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e1e5eb;
+}

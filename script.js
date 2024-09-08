@@ -67,13 +67,14 @@ function generateProposal() {
         `;
     }
 
+    // Estilo do plano
     proposalText += `
         <h3>Plano</h3>
-        <ul>
+        <ul style="padding: 0; list-style: none; margin-bottom: 10px;">
     `;
 
     selectedProducts.forEach(function (product) {
-        proposalText += `<li>${product}</li>`;
+        proposalText += `<li style="background-color: #f9f9f9; padding: 5px 10px; margin-bottom: 3px; border-radius: 4px; font-size: 14px;">${product}</li>`;
     });
 
     proposalText += `</ul>`;
@@ -95,7 +96,7 @@ function displayPaymentOptions(totalAmount, discount) {
         </div>
     `;
 
-    // Opção 2: Boleto Bancário com seletor de parcelas (somente aqui)
+    // Opção 2: Boleto Bancário com seletor de parcelas
     let boletoOptions = `
         <div class="payment-option boleto">
             <p><strong>Opção 2:</strong> Pagamento via Boleto</p>
@@ -156,8 +157,6 @@ document.getElementById('printProposalButton').addEventListener('click', functio
 });
 
 // Função para abrir a nova janela com a proposta comercial
-
-// Função para abrir a nova janela com a proposta comercial
 function openProposalInNewPage() {
     const proposalContent = document.getElementById('proposalOutput').innerHTML;
     const paymentDetails = document.getElementById('paymentDetails').innerHTML;
@@ -180,7 +179,7 @@ function openProposalInNewPage() {
     // Remover o seletor de quantidade de boletos da visualização
     const paymentDetailsWithoutSelect = paymentDetails.replace(/<select[\s\S]*?<\/select>/, '');
 
-    // Adicionando o estilo da página 2 na nova janela, agora com um layout mais compacto
+    // Estilo da página 2 com layout harmonizado e mais compacto
     const styles = `
         <style>
             body {
@@ -313,83 +312,3 @@ function openProposalInNewPage() {
     newWindow.document.close();
     newWindow.focus();
 }
-
-
-function generateProposal() {
-    const companyName = document.getElementById('companyName').value;
-    const clientName = document.getElementById('clientName').value;
-    const dueDate = document.getElementById('dueDate').value;
-    const teams = parseInt(document.getElementById('teams').value) || 1;
-    const discount = parseFloat(document.getElementById('discount').value) || 0;
-
-    // Validação simples de campos obrigatórios
-    if (!companyName || !clientName || !dueDate) {
-        alert('Preencha todos os campos obrigatórios!');
-        return;
-    }
-
-    const selectedProducts = [];
-    const productElements = document.querySelectorAll('input[type="checkbox"]:checked');
-    let totalPrice = 0;
-
-    // Calcular o valor total
-    productElements.forEach(function (product) {
-        const price = parseFloat(product.dataset.price);
-        let annualPrice;
-
-        switch (product.id) {
-            case 'product2': // Implantação - valor fixo de R$299,00
-                annualPrice = IMPLANTACAO_FIXA;
-                break;
-            case 'product3': // Licença - Aplicativo do Colaborador
-                annualPrice = price * teams * 12;
-                break;
-            case 'product1': // Painel de gestão
-                annualPrice = price * 12;
-                break;
-            default: // Outros módulos
-                annualPrice = price * 12;
-        }
-
-        totalPrice += annualPrice;
-        selectedProducts.push(`${product.dataset.name} - ${formatCurrency(annualPrice)}`);
-    });
-
-    const discountedPrice = totalPrice - (totalPrice * (discount / 100));
-
-    // Geração da proposta
-    let proposalText = `
-        <h2>Proposta Comercial</h2>
-        <div class="proposal-info">
-            <p><strong>Nome da Empresa:</strong> ${companyName}</p>
-            <p><strong>Nome do Cliente:</strong> ${clientName}</p>
-            <p><strong>Data de Vencimento:</strong> ${formatDateBR(dueDate)}</p>
-            <p><strong>Quantidade de Equipes de Campo:</strong> ${teams}</p>
-            <p><strong>Total Anual:</strong> ${formatCurrency(totalPrice)}</p>
-        </div>
-    `;
-
-    if (discount > 0) {
-        proposalText += `
-            <p><strong>Desconto:</strong> ${discount}%</p>
-            <p><strong>Total com Desconto:</strong> ${formatCurrency(discountedPrice)}</p>
-        `;
-    }
-
-    // Ajuste no estilo da lista do plano (apenas na segunda tela)
-    proposalText += `
-        <h3>Plano</h3>
-        <ul style="padding: 0; list-style: none; margin-bottom: 10px;">
-    `;
-
-    selectedProducts.forEach(function (product) {
-        proposalText += `<li style="background-color: #f9f9f9; padding: 5px 10px; margin-bottom: 3px; border-radius: 4px; font-size: 14px;">${product}</li>`;
-    });
-
-    proposalText += `</ul>`;
-
-    document.getElementById('proposalOutput').innerHTML = proposalText;
-    displayPaymentOptions(discountedPrice, discount);
-}
-
-///tese
