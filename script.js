@@ -12,7 +12,6 @@ function generateProposal() {
     const dueDate = document.getElementById('dueDate').value;
     const teams = parseInt(document.getElementById('teams').value) || 1;
     const discount = parseFloat(document.getElementById('discount').value) || 0;
-    const boletoInstallments = 1; // Inicialmente o valor de parcelas é 1, será atualizado na opção 2
 
     // Validação simples de campos obrigatórios
     if (!companyName || !clientName || !dueDate) {
@@ -80,11 +79,12 @@ function generateProposal() {
     proposalText += `</ul>`;
 
     document.getElementById('proposalOutput').innerHTML = proposalText;
-    displayPaymentOptions(discountedPrice, boletoInstallments);
+    displayPaymentOptions(discountedPrice, discount);
 }
 
-function displayPaymentOptions(totalAmount, boletoInstallments) {
+function displayPaymentOptions(totalAmount, discount) {
     const maxInstallments = 12;
+    let boletoInstallments = 1;
 
     // Opção 1: Cartão de Crédito - fixo em até 12 parcelas
     let cardInstallments = `
@@ -114,16 +114,25 @@ function displayPaymentOptions(totalAmount, boletoInstallments) {
         </div>
     `;
 
-    document.getElementById('paymentDetails').innerHTML = `${cardInstallments}${boletoOptions}`;
+    let attentionMessage = '';
+    if (discount > 15) {
+        attentionMessage = `
+            <div class="attention" style="color: red; font-weight: bold; margin-top: 20px; text-align: center;">
+                <p><strong>Atenção:</strong> A proposta comercial corre o risco de não ser aprovada pela diretoria devido ao desconto elevado (${discount}%).</p>
+            </div>
+        `;
+    }
+
+    document.getElementById('paymentDetails').innerHTML = `${cardInstallments}${boletoOptions}${attentionMessage}`;
 
     // Atualizar o valor das parcelas ao selecionar uma nova quantidade de boletos
     document.getElementById('boletoInstallments').addEventListener('change', function () {
-        const newInstallments = parseInt(this.value);
-        const installmentValue = totalAmount / newInstallments;
+        boletoInstallments = parseInt(this.value);
+        const installmentValue = totalAmount / boletoInstallments;
 
         // Verifica se o valor da parcela é válido e exibe
         if (isFinite(installmentValue)) {
-            document.getElementById('boletoInstallmentsAmount').innerText = `Parcelamento em ${newInstallments}x de ${formatCurrency(installmentValue)}`;
+            document.getElementById('boletoInstallmentsAmount').innerText = `Parcelamento em ${boletoInstallments}x de ${formatCurrency(installmentValue)}`;
         } else {
             document.getElementById('boletoInstallmentsAmount').innerText = `Erro ao calcular parcelas`;
         }
@@ -171,13 +180,14 @@ function openProposalInNewPage() {
             body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 30px; background-color: #f0f2f5; color: #333; }
             h2 { text-align: center; font-size: 28px; color: #1a73e8; margin-bottom: 20px; }
             .proposal-content { background-color: #fff; padding: 20px; margin: 0 auto; max-width: 900px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
-            .proposal-info p { font-size: 18px; margin: 5px 0; font-weight: bold; }
+            .proposal-info p { font-size: 18px; margin: 5px 0; font-weight: bold; line-height: 1.5; text-align: justify; }
             ul { padding: 0; list-style: none; margin-bottom: 30px; }
-            ul li { background-color: #f9f9f9; padding: 12px 20px; margin-bottom: 10px; border-radius: 6px; font-size: 16px; color: #444; }
+            ul li { background-color: #f9f9f9; padding: 12px 20px; margin-bottom: 10px; border-radius: 6px; font-size: 16px; color: #444; line-height: 1.4; }
             .total { font-weight: bold; font-size: 20px; margin-top: 25px; color: #1a73e8; text-align: right; }
             .payment-options { margin-top: 40px; }
             .payment-option { background-color: #fafafa; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
             .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #777; }
+            .attention { margin-top: 20px; text-align: center; color: red; font-weight: bold; }
         </style>
     `;
 
