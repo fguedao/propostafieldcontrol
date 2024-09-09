@@ -176,8 +176,9 @@ function openProposalInNewPage() {
         return;
     }
 
-    // Remover o seletor de quantidade de boletos da visualização
-    const paymentDetailsWithoutSelect = paymentDetails.replace(/<select[\s\S]*?<\/select>/, '');
+    // Remover o seletor de quantidade de boletos e a frase 'Escolha o número de boletos' da visualização
+const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/label>\s*<select[\s\S]*?<\/select>/, '');
+
 
     // Estilo da página 2 com layout harmonizado e mais compacto
     const styles = `
