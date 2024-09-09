@@ -157,6 +157,7 @@ document.getElementById('printProposalButton').addEventListener('click', functio
 });
 
 // Função para abrir a nova janela com a proposta comercial
+// Função para abrir a nova janela com a proposta comercial
 function openProposalInNewPage() {
     const proposalContent = document.getElementById('proposalOutput').innerHTML;
     const paymentDetails = document.getElementById('paymentDetails').innerHTML;
@@ -177,8 +178,10 @@ function openProposalInNewPage() {
     }
 
     // Remover o seletor de quantidade de boletos e a frase 'Escolha o número de boletos' da visualização
-const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/label>\s*<select[\s\S]*?<\/select>/, '');
+    const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/label>\s*<select[\s\S]*?<\/select>/, '');
 
+    // Remover a mensagem de atenção da segunda página (caso exista na primeira)
+    const paymentDetailsWithoutAttention = paymentDetailsWithoutSelect.replace(/<div class="attention"[\s\S]*?<\/div>/, '');
 
     // Estilo da página 2 com layout harmonizado e mais compacto
     const styles = `
@@ -264,18 +267,6 @@ const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/lab
                 margin: 6px 0;
                 line-height: 1.4;
             }
-            .attention {
-                background-color: #ffe6e6;
-                border-left: 4px solid red;
-                padding: 10px 15px;
-                border-radius: 8px;
-                font-size: 0.95rem;
-                font-weight: 500;
-                color: #e53935;
-                margin-top: 15px;
-                text-align: center;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
             .footer {
                 text-align: center;
                 margin-top: 30px;
@@ -285,7 +276,7 @@ const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/lab
         </style>
     `;
 
-    // Conteúdo a ser exibido na nova janela sem o seletor de quantidade de boletos
+    // Conteúdo a ser exibido na nova janela sem o seletor de quantidade de boletos e sem a mensagem de atenção
     const newWindowContent = `
         <html>
             <head>
@@ -297,10 +288,10 @@ const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/lab
                     ${proposalContent}
                     <div id="paymentDetails">
                         <h3>Detalhes do Pagamento</h3>
-                        ${paymentDetailsWithoutSelect}
+                        ${paymentDetailsWithoutAttention}
                     </div>
                     <div class="footer">
-                        <p>Proposta válida até ${formatDateBR(document.getElementById('dueDate').value)}</p>
+                        <p>Esta proposta é válida até a data de vencimento. Após essa data, poderá ser alterada.</p>
                         <p>Field Control - Soluções para Gestão de Equipes de Campo</p>
                     </div>
                 </div>
@@ -313,3 +304,4 @@ const paymentDetailsWithoutSelect = paymentDetails.replace(/<label[\s\S]*?<\/lab
     newWindow.document.close();
     newWindow.focus();
 }
+
