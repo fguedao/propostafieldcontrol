@@ -115,28 +115,23 @@ function displayPaymentOptions(totalAmount, discount) {
         </div>
     `;
 
-    let attentionMessage = '';
-    if (discount > 15) {
-        attentionMessage = `
-            <div class="attention" style="color: red; font-weight: bold; margin-top: 20px; text-align: center;">
-                <p><strong>Atenção:</strong> A proposta comercial corre o risco de não ser aprovada pela diretoria devido ao desconto elevado (${discount}%).</p>
-            </div>
-        `;
-    }
-
-    document.getElementById('paymentDetails').innerHTML = `${cardInstallments}${boletoOptions}${attentionMessage}`;
+    document.getElementById('paymentDetails').innerHTML = `${cardInstallments}${boletoOptions}`;
 
     // Atualizar o valor das parcelas ao selecionar uma nova quantidade de boletos
     document.getElementById('boletoInstallments').addEventListener('change', function () {
         boletoInstallments = parseInt(this.value);
         const installmentValue = totalAmount / boletoInstallments;
 
-        // Verifica se o valor da parcela é válido e exibe
-        if (isFinite(installmentValue)) {
-            document.getElementById('boletoInstallmentsAmount').innerText = `Parcelamento em ${boletoInstallments}x de ${formatCurrency(installmentValue)}`;
-        } else {
-            document.getElementById('boletoInstallmentsAmount').innerText = `Erro ao calcular parcelas`;
+        // Verificar se o valor da parcela é menor que 500 reais
+        if (installmentValue < 500) {
+            alert("O valor mínimo de cada parcela deve ser de R$500. O número de parcelas foi ajustado.");
+            // Ajusta automaticamente para o número de parcelas que deixa a parcela maior ou igual a R$500
+            boletoInstallments = Math.floor(totalAmount / 500);
+            this.value = boletoInstallments; // Ajustar a seleção
         }
+
+        // Exibe o valor atualizado das parcelas
+        document.getElementById('boletoInstallmentsAmount').innerText = `Parcelamento em ${boletoInstallments}x de ${formatCurrency(totalAmount / boletoInstallments)}`;
     });
 }
 
